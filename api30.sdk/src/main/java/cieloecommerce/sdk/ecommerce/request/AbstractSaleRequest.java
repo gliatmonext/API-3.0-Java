@@ -17,6 +17,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import com.google.gson.Gson;
 import cieloecommerce.sdk.Environment;
 import cieloecommerce.sdk.Merchant;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Abstraction to reuse most of the code that send and receive the HTTP
@@ -26,7 +28,7 @@ public abstract class AbstractSaleRequest<Request, Response> {
 	final Environment environment;
 	private final Merchant merchant;
 	private HttpClient httpClient;
-
+	private static final Logger LOGGER = LogManager.getLogger(AbstractSaleRequest.class);
 	AbstractSaleRequest(Merchant merchant, Environment environment) {
 		this.merchant = merchant;
 		this.environment = environment;
@@ -112,8 +114,6 @@ public abstract class AbstractSaleRequest<Request, Response> {
 		Response response = null;
 		Gson gson = new Gson();
 
-		System.out.println(responseBody);
-
 		switch (statusCode) {
 		case 200:
 		case 201:
@@ -124,8 +124,7 @@ public abstract class AbstractSaleRequest<Request, Response> {
 			CieloError[] errors = gson.fromJson(responseBody, CieloError[].class);
 
 			for (CieloError error : errors) {
-				System.out.printf("%s: %s", "Cielo Error [" + error.getCode() + "]", error.getMessage());
-
+				LOGGER.error("{}: {}", "Cielo Error [" + error.getCode() + "]", error.getMessage());
 				exception = new CieloRequestException(error.getMessage(), error, exception);
 			}
 
@@ -133,7 +132,7 @@ public abstract class AbstractSaleRequest<Request, Response> {
 		case 404:
 			throw new CieloRequestException("Not found", new CieloError(404, "Not found"), null);
 		default:
-			System.out.printf("%s: %s", "Cielo", "Unknown status: " + statusCode);
+			LOGGER.error("{}: {}", "Cielo", "Unknown status: " + statusCode);
 		}
 
 		return response;

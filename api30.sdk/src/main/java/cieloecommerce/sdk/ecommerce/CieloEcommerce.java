@@ -116,8 +116,8 @@ public class CieloEcommerce {
 	/**
 	 * Query a Sale on Cielo by paymentId
 	 *
-	 * @param paymentId
-	 *            The paymentId to be queried
+	 * @param merchantOrderId
+	 *            The merchant order id to be queried
 	 * @return The Sale with authorization, tid, etc. returned by Cielo.
 	 * @throws IOException
 	 * @throws CieloRequestException
@@ -292,4 +292,17 @@ public class CieloEcommerce {
 	public SaleResponse captureSale(String paymentId) throws IOException, CieloRequestException {
 		return captureSale(paymentId, null, null);
 	}
+
+    /**
+     * Query a card bin info
+     * @param cardBin the Card bin to request
+     * @return the card bin response
+     * @throws IOException
+     * @throws CieloRequestException
+     */
+    public CardBinResponse queryCarBin(final String cardBin) throws IOException, CieloRequestException {
+        final CardBinRequest request = new CardBinRequest(merchant, environment);
+        request.setHttpClient(httpClient);
+        return request.execute(cardBin);
+    }
 }
